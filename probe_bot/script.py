@@ -1,10 +1,9 @@
-
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
-from probe_bot.handlers import StepsForm
+from aiogram.types import Message, audio
+from probe_bot.utils import StepsForm
 
 
-async def process_start_command(message: Message, state: FSMContext):
+async def first_cmd(message: Message, state: FSMContext):
     await message.answer('Привет введи своё имя!')
     await state.set_state(StepsForm.FILE_NAME)
 
