@@ -1,5 +1,5 @@
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, audio
+from aiogram.types import Message
 from probe_bot.utils import StepsForm
 
 
