@@ -1,8 +1,7 @@
 from probe_bot.basis import download
-from probe_bot.script import first_cmd, count_file, final
+from probe_bot.script import first_cmd
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
-from probe_bot.utils import StepsForm
 import asyncio
 import logging
 
@@ -25,9 +24,7 @@ async def start():
     dp = Dispatcher()
     dp.startup.register(start_bot)
     dp.shutdown.register(stop_bot)
-    dp.message.register(first_cmd, Command(commands='fill'))
-    dp.message.register(count_file, StepsForm.FILE_NAME)
-    dp.message.register(final, StepsForm.COUNT_FILE)
+    dp.message.register(first_cmd, Command(commands='start'))
     dp.message.register(download)
     try:
         await dp.start_polling(bot)
