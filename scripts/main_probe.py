@@ -1,10 +1,8 @@
-from probe_bot.basis import download
-from probe_bot.script import first_cmd, count_file, final
 from aiogram import Bot, Dispatcher
-from aiogram.filters import Command
-from probe_bot.utils import StepsForm
 import asyncio
 import logging
+
+from scripts.probe2 import download_audio
 
 BOT_TOKEN = '6853584795:AAG1X_3nVDG9SzatOwKvlxooIpAsrBhYXrE'
 
@@ -25,10 +23,7 @@ async def start():
     dp = Dispatcher()
     dp.startup.register(start_bot)
     dp.shutdown.register(stop_bot)
-    dp.message.register(first_cmd, Command(commands='fill'))
-    dp.message.register(count_file, StepsForm.FILE_NAME)
-    dp.message.register(final, StepsForm.COUNT_FILE)
-    dp.message.register(download)
+    dp.message.register(download_audio)
     try:
         await dp.start_polling(bot)
     finally:
