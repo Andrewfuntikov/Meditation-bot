@@ -3,7 +3,8 @@ from aiogram.types import Message, FSInputFile
 from pydub import AudioSegment
 import os
 import time
-import random
+import speech_recognition as sr
+from probe_bot.voice_the_text import get_audio_messages
 
 sounds_pydub_format = []
 
@@ -15,6 +16,18 @@ random_symbol_list = [
     'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';',
     ':', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ','
 ]
+
+
+def audio_to_text(dest_name: str):
+    # Функция для перевода аудио, в формате ".vaw" в текст
+    r = sr.Recognizer()  # такое вообще надо комментить?
+    # тут мы читаем наш .vaw файл
+    message = sr.AudioFile(dest_name)
+    with message as source:
+        audio = r.record(source)
+    result = r.recognize_google(audio,
+                                language="ru_RU")  # используя возможности библиотеки распознаем текст, так же тут можно изменять язык распознавания
+    return result
 
 
 async def download(message: Message, bot: Bot):
@@ -31,18 +44,40 @@ async def download(message: Message, bot: Bot):
         sounds_pydub_format.append(sound)
         await message.answer('Спасибо за аудиосообщение! Теперь отправьте ещё, и я их склею.')
     elif message.content_type == 'voice':
-        random_symbol = random.sample(random_symbol_list, 10)
-        random_symbol_string = ''.join(random_symbol)
-        file_id = message.voice.file_id
-        file = await bot.get_file(file_id)
-        user_id = message.from_user.id
-        file_path = file.file_path
-        file_name_ex = f'{user_id}_VOICE_{random_symbol_string}.mp3'
-        await bot.download_file(file_path, file_name_ex)
-        sounds_name.append(file_name_ex)
-        sound = AudioSegment.from_mp3(file_name_ex)
-        sounds_pydub_format.append(sound)
-        await message.answer('Спасибо за аудиосообщение! Теперь отправьте ещё, и я их склею.')
+        get_audio_messages()
+        # # Получаем файл голосового сообщения
+        # file_id = message.voice.file_id
+        # file = await bot.get_file(file_id)
+        # user_id = message.from_user.id
+        # file_path = file.file_path
+        #
+        # # Скачиваем файл голосового сообщения
+        # voice_file = io.BytesIO()
+        # await bot.download_file(file_path, voice_file)
+        # voice_file.seek(0)
+        #
+        # # Распознаём речь
+        # r = sr.Recognizer()
+        # audio = sr.AudioFile(voice_file)
+        # with audio as source:
+        #     audio_data = r.record(source)
+        # text = r.recognize_google(audio_data, language="ru-RU")
+        #
+        # # Отправляем распознанный текст пользователю
+        # await message.answer(text)
+
+        # random_symbol = random.sample(random_symbol_list, 10)
+        # random_symbol_string = ''.join(random_symbol)
+        # file_id = message.voice.file_id
+        # file = await bot.get_file(file_id)
+        # user_id = message.from_user.id
+        # file_path = file.file_path
+        # file_name_ex = f'{user_id}_VOICE_{random_symbol_string}.mp3'
+        # await bot.download_file(file_path, file_name_ex)
+        # sounds_name.append(file_name_ex)
+        # sound = AudioSegment.from_mp3(file_name_ex)
+        # sounds_pydub_format.append(sound)
+        # await message.answer('Спасибо за аудиосообщение! Теперь отправьте ещё, и я их склею.')
     elif message.text.lower() == 'хватит':
         combined_sound = sum(sounds_pydub_format)
         user_id = message.from_user.id
