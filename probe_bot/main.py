@@ -7,8 +7,7 @@ import logging
 
 BOT_TOKEN = '6853584795:AAG1X_3nVDG9SzatOwKvlxooIpAsrBhYXrE'
 
-
-# Создаем объекты бота и диспетчера
+# TODO убрать лишние файлы
 async def start_bot(bot: Bot):
     await bot.send_message(5867884661, text='Бот запущен')
 
@@ -32,6 +31,5 @@ async def start():
         await bot.session.close()
 
 
-# Запускаем поллинг
 if __name__ == '__main__':
     asyncio.run(start())
