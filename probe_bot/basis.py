@@ -16,6 +16,8 @@ random_symbol_list = [
     'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';',
     ':', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ','
 ]
+
+
 # TODO всё в файле probe2.py и сделать интеграцию его себя
 
 
@@ -46,21 +48,21 @@ async def download(message: Message, bot: Bot):
         # sound = AudioSegment.from_mp3(file_name_ex)
         # sounds_pydub_format.append(sound)
         # await message.answer('Спасибо за аудиосообщение! Теперь отправьте ещё, и я их склею.')
-        import speech_recognition as sr
-
-        # Создаем объект распознавателя речи
-        recognizer = sr.Recognizer()
-
-        # Загружаем аудио файл
-        audio_file = sr.AudioFile(file_name_ex)
-
-        # Распознаем речь из аудио файла
-        with audio_file as source:
-            audio_data = recognizer.record(source)
-            text = recognizer.recognize_google(audio_data)
-
-        # Выводим текст
-        print(text)
+        # import speech_recognition as sr
+        #
+        # # Создаем объект распознавателя речи
+        # recognizer = sr.Recognizer()
+        #
+        # # Загружаем аудио файл
+        # audio_file = sr.AudioFile(file_name_ex)
+        #
+        # # Распознаем речь из аудио файла
+        # with audio_file as source:
+        #     audio_data = recognizer.record(source)
+        #     text = recognizer.recognize_google(audio_data)
+        #
+        # # Выводим текст
+        # print(text)
     # # Получаем файл голосового сообщения
     # file_id = message.voice.file_id
     # file = await bot.get_file(file_id)
@@ -81,7 +83,6 @@ async def download(message: Message, bot: Bot):
     #
     # # Отправляем распознанный текст пользователю
     # await message.answer(text)
-
 
     elif message.text.lower() == 'хватит':
         combined_sound = sum(sounds_pydub_format)
