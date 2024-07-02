@@ -24,9 +24,6 @@ random_symbol_list = [
 ]
 
 
-# TODO всё в файле probe2.py и сделать интеграцию его себя
-
-
 async def download(message: Message, bot: Bot):
     if message.content_type == 'audio':
         file_id = message.audio.file_id
@@ -79,11 +76,11 @@ async def download(message: Message, bot: Bot):
         startConvertion()
         await message.answer('Спасибо за голосовое! Теперь отправьте ещё, и я их склею.')
     elif message.text.lower() == 'хватит':
-        combined_sound = sum(sounds_pydub_format)
         user_id = message.from_user.id
         first_name_user = message.from_user.first_name
         user_name = message.from_user.username
         file_name_ex = f'{user_id}_AUDIO_FINAL_{first_name_user}_{user_name}.mp3'
+        combined_sound = sum(sounds_pydub_format)
         combined_sound.export(file_name_ex, format="mp3")
         try:
             await bot.send_audio(audio=FSInputFile(file_name_ex), chat_id=user_id)
