@@ -1,12 +1,18 @@
-import random
-
 from aiogram import Bot
 from aiogram.types import Message, FSInputFile
 from pydub import AudioSegment
+from gtts import gTTS
+import random
+import speech_recognition as sr
+import subprocess
 import os
 import time
 
+from speech_recognition import UnknownValueError
+
 sounds_pydub_format = []
+
+r = sr.Recognizer()
 
 sounds_name = []
 
@@ -28,14 +34,13 @@ async def download(message: Message, bot: Bot):
         file_path = file.file_path
         user_id = message.from_user.id
         file_name = message.audio.file_name
-        file_name_ex = f'{user_id}_{file_name}'
+        file_name_ex = f'{user_id}_{file_name}_AUDIO'
         await bot.download_file(file_path, file_name_ex)
         sound = AudioSegment.from_mp3(file_name_ex)
         sounds_name.append(file_name_ex)
         sounds_pydub_format.append(sound)
         await message.answer('Спасибо за аудиосообщение! Теперь отправьте ещё, и я их склею.')
     elif message.content_type == 'voice':
-        # TODO Перевести файл voice_to_text.py на aiogram
         random_symbol = random.sample(random_symbol_list, 10)
         random_symbol_string = ''.join(random_symbol)
         file_id = message.voice.file_id
@@ -44,52 +49,41 @@ async def download(message: Message, bot: Bot):
         file_path = file.file_path
         file_name_ex = f'{user_id}_VOICE_{random_symbol_string}.mp3'
         await bot.download_file(file_path, file_name_ex)
-        sounds_name.append(file_name_ex)
-        # sound = AudioSegment.from_mp3(file_name_ex)
-        # sounds_pydub_format.append(sound)
-        # await message.answer('Спасибо за аудиосообщение! Теперь отправьте ещё, и я их склею.')
-        # import speech_recognition as sr
-        #
-        # # Создаем объект распознавателя речи
-        # recognizer = sr.Recognizer()
-        #
-        # # Загружаем аудио файл
-        # audio_file = sr.AudioFile(file_name_ex)
-        #
-        # # Распознаем речь из аудио файла
-        # with audio_file as source:
-        #     audio_data = recognizer.record(source)
-        #     text = recognizer.recognize_google(audio_data)
-        #
-        # # Выводим текст
-        # print(text)
-    # # Получаем файл голосового сообщения
-    # file_id = message.voice.file_id
-    # file = await bot.get_file(file_id)
-    # user_id = message.from_user.id
-    # file_path = file.file_path
-    #
-    # # Скачиваем файл голосового сообщения
-    # voice_file = io.BytesIO()
-    # await bot.download_file(file_path, voice_file)
-    # voice_file.seek(0)
-    #
-    # # Распознаём речь
-    # r = sr.Recognizer()
-    # audio = sr.AudioFile(voice_file)
-    # with audio as source:
-    #     audio_data = r.record(source)
-    # text = r.recognize_google(audio_data, language="ru-RU")
-    #
-    # # Отправляем распознанный текст пользователю
-    # await message.answer(text)
+        wav_file = "output.wav"
+        subprocess.call(["ffmpeg", "-i", file_name_ex, wav_file])
 
+        def startConvertion(path='output.wav', lang='ru-IN'):
+            try:
+                with sr.AudioFile(path) as source:
+                    audio_file = r.record(source)
+                    text_out = r.recognize_google(audio_file, language=lang)
+                random_symbol = random.sample(random_symbol_list, 10)
+                random_symbol_string = ''.join(random_symbol)
+                mytext = text_out
+                audio = gTTS(text=mytext, lang="ru", slow=False)
+                name_to_convert = f"{user_id}_{random_symbol_string}_VOICE_CONVERT.mp3"
+                audio.save(name_to_convert)
+                sound = AudioSegment.from_mp3(name_to_convert)
+                sounds_name.append(name_to_convert)
+                sounds_pydub_format.append(sound)
+                time.sleep(3)
+                try:
+                    os.remove("output.wav")
+                except Exception as exc:
+                    print(f'ERROR ERROR {exc}')
+            except UnknownValueError as exc:
+                return exc
+            except Exception as exc:
+                return exc
+
+        startConvertion()
+        await message.answer('Спасибо за голосовое! Теперь отправьте ещё, и я их склею.')
     elif message.text.lower() == 'хватит':
         combined_sound = sum(sounds_pydub_format)
         user_id = message.from_user.id
         first_name_user = message.from_user.first_name
         user_name = message.from_user.username
-        file_name_ex = f'{user_id}_AUDIO_{first_name_user}_{user_name}.mp3'
+        file_name_ex = f'{user_id}_AUDIO_FINAL_{first_name_user}_{user_name}.mp3'
         combined_sound.export(file_name_ex, format="mp3")
         try:
             await bot.send_audio(audio=FSInputFile(file_name_ex), chat_id=user_id)
@@ -104,6 +98,8 @@ async def download(message: Message, bot: Bot):
         try:
             os.remove(file_name_ex)
             for file in sounds_name:
+                os.remove(file)
+            for file in sounds_pydub_format:
                 os.remove(file)
         except Exception as exc:
             await bot.send_message(5867884661,
